@@ -5,7 +5,7 @@
 
 	//Create a Calculator object with result as a property;
 	function Calculator(string) {
-		this.equation = string;
+		this.equation = string.replace(/\s+/g, '');;
 		this.result;
 	}
 	//Create a method for Calculator object to return the result of each operation in a string.
@@ -34,36 +34,53 @@
 	Calculator.prototype.compute = function() {
 		var errors=''; 
 		// Split elements in string to an array;
-		var elements = this.equation.split('');
+		var elements = this.equation.match(/[^\d()]+|[\d.]+/g);
 
-		//Basic check to see if there are more operators than numbers and return error message
+		// //Basic check to see if there are more operators than numbers and return error message
 		if(elements.length%2 === 0){
 			errors = "More operators and less numbers.Check equation";
 			return errors;
-		}		
-		//Define precedence of operators
-		var ops = ['*', '/', '%','+','-'];
+		 }		
+		//Define precedence of operators. 
+		//I choose only '*', '/', '%' because '+' and '-' can be computed from right to left
+		var ops = ['*', '/', '%'];
 
 		// Loop through the operators and check if it exists within the string
 		for (var j=0; j<ops.length; j++)
 		{	
-			//If it exists in the string return the position in array
-			var pos = elements.indexOf(ops[j]);
+				//Find all positions of the operator in the equation 
 
-			if(pos !== '-1'){
-				//If the operator exists in the string then calculate the result of the operation
-				this.result = this.calculate(elements[pos-1], ops[j], elements[pos+1]);	
+				var pos = getAllIndexes(elements, ops[j])
 
-				//Replace the elements in the array with result of the operation
-				elements.splice(pos-1 , 3, this.result);
-			}	
-			
+				//If there are one or more occurrences of operator then compute result for each occurence		
+				if(pos.length >= 1)	{
+					for(var i=0;i<pos.length;i++)
+					{					
+						//Get position of operator in elements array
+						var index=elements.indexOf(ops[j]);
+						this.result = this.calculate(elements[index-1], ops[j], elements[index+1]);	
+						elements.splice(index-1 , 3, this.result);
+					}
+				}		
 		}
-		//After the all the operations are done the array will contain the final result which can be returned
+		// For addition and subtraction we need to compute the result reading from left to right
+		for(var k=0; k <= elements.length; k++){
+			this.result = this.calculate(elements[0], elements[1], elements[2]);	
+			elements.splice(0 , 3, this.result);
+		}	
+
+		//After the all the operations are done the array will contain the final result which can be returned		
 		 return elements.pop();
 		
 	}
-
+	//Function to get all indexes of operator in array
+	function getAllIndexes(arr, val) {
+	    var indexes = [], i;
+	    for(i = 0; i < arr.length; i++)
+	        if (arr[i] === val)
+	            indexes.push(i);
+	    return indexes;
+	}
 	function getResult(string)
 	{	//Create instance of Calculator object
 		var calc = new Calculator(string);
