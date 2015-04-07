@@ -1,0 +1,80 @@
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+
+	//Create a Calculator object with result as a property;
+	function Calculator(string) {
+		this.equation = string;
+		this.result;
+	}
+	//Create a method for Calculator object to return the result of each operation in a string.
+	Calculator.prototype.calculate = function(a, op, b) {
+		a = parseInt(a);
+		b = parseInt(b);
+		switch(op){
+			case '*': return a*b;
+			break;
+
+			case '/': return a/b;
+			break;
+
+			case '%': return a%b;
+			break;
+
+			case '+': return a+b;
+			break;
+
+			case '-': return a-b;
+			break;
+		}
+	}
+
+	//Create a method to check for operator precedence and call the calculate method based on precedence
+	Calculator.prototype.compute = function() {
+		var errors=''; 
+		// Split elements in string to an array;
+		var elements = this.equation.split('');
+
+		//Basic check to see if there are more operators than numbers and return error message
+		if(elements.length%2 === 0){
+			errors = "More operators and less numbers.Check equation";
+			return errors;
+		}		
+		//Define precedence of operators
+		var ops = ['*', '/', '%','+','-'];
+
+		// Loop through the operators and check if it exists within the string
+		for (var j=0; j<ops.length; j++)
+		{	
+			//If it exists in the string return the position in array
+			var pos = elements.indexOf(ops[j]);
+
+			if(pos !== '-1'){
+				//If the operator exists in the string then calculate the result of the operation
+				this.result = this.calculate(elements[pos-1], ops[j], elements[pos+1]);	
+
+				//Replace the elements in the array with result of the operation
+				elements.splice(pos-1 , 3, this.result);
+			}	
+			
+		}
+		//After the all the operations are done the array will contain the final result which can be returned
+		 return elements.pop();
+		
+	}
+
+	function getResult(string)
+	{	//Create instance of Calculator object
+		var calc = new Calculator(string);
+		document.getElementById('result').innerHTML = calc.compute();
+	}
+	</script>
+</head>
+<body>
+	<label>Enter equation:</label>
+	<input type="text" id="input">
+	<input type="button" value="Calculate" onClick="getResult(getElementById('input').value)">
+	<p>Result is: </label><span id="result"></span><p>
+</body>
+</html>
